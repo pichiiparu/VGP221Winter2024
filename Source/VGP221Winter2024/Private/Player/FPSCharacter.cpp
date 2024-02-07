@@ -24,7 +24,7 @@ AFPSCharacter::AFPSCharacter()
 	}
 
 	GetMesh()->SetOwnerNoSee(true);
-
+	sprintSpeedMultiplier = 1.0f;  
 	UE_LOG(LogTemp, Warning, TEXT("Constructor Called from FPSCharacter"));
 }
 
@@ -41,7 +41,6 @@ void AFPSCharacter::BeginPlay()
 void AFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -63,18 +62,22 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	// Fire
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
+
+	//Sprint
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFPSCharacter::StartSprint); 
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFPSCharacter::EndSprint); 
 }
 
 void AFPSCharacter::MoveForward(float value)
 {
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-	AddMovementInput(Direction, value);
+	AddMovementInput(Direction, value * sprintSpeedMultiplier);
 }
 
 void AFPSCharacter::MoveRightNotTheSameName(float value)
 {
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-	AddMovementInput(Direction, value);
+	AddMovementInput(Direction, value * sprintSpeedMultiplier);
 }
 
 void AFPSCharacter::StartJump()
@@ -86,6 +89,21 @@ void AFPSCharacter::EndJump()
 {
 	bPressedJump = false;
 }
+
+void AFPSCharacter::StartSprint()  
+{
+	isSprinting = true;
+	sprintSpeedMultiplier = 50.0f; 
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Player Sprint Pressed"))); 
+
+}
+
+void AFPSCharacter::EndSprint()
+{
+	isSprinting = false; 
+	sprintSpeedMultiplier = 1.0f; 
+}
+
 
 void AFPSCharacter::Fire()
 {
@@ -131,6 +149,6 @@ void AFPSCharacter::Fire()
 			FVector LaunchDirection = MuzzleRotation.Vector();
 			Projectile->FireInDirection(LaunchDirection);
 		}
-	}
+	} 
 }
 

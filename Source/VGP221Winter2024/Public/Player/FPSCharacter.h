@@ -54,9 +54,16 @@ public:
 	void StartJump();
 	void EndJump();
 
+	void StartSprint();
+	void EndSprint(); 
+
 	void Fire();
 
 	// Temp health code
 	float Health = 100;
 	const float MaxHealth = 100;
+
+	// Sprint / Movement 
+	bool isSprinting;
+	float sprintSpeedMultiplier;  
 };

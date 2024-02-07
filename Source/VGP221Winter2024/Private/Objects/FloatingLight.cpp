@@ -7,6 +7,8 @@ AFloatingLight::AFloatingLight()
     PrimaryActorTick.bCanEverTick = true;
 
     LightComponent = CreateDefaultSubobject<UPointLightComponent>(TEXT("Point Light")); // Create PointLightComponent
+
+    // Add box component to see if it rotates 
     //RootComponent = LightComponent; // Attach PointLightComponent to root
     LightComponent->SetupAttachment(RootComponent); 
     LightComponent->SetMobility(EComponentMobility::Movable); 
