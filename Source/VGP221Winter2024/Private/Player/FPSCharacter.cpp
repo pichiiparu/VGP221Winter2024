@@ -112,7 +112,7 @@ void AFPSCharacter::Fire()
 	FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
 
 	FRotator MuzzleRotation = CameraRotation;
-	//MuzzleRotation.Pitch += 10.0f;
+	MuzzleRotation.Pitch += 5.0f;
 
 	// Instantiate
 	// 1. Get the world we want to spawn
