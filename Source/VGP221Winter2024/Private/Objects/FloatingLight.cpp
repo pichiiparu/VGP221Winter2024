@@ -8,8 +8,8 @@ AFloatingLight::AFloatingLight()
 
     LightComponent = CreateDefaultSubobject<UPointLightComponent>(TEXT("Point Light")); // Create PointLightComponent
 
-    // Add box component to see if it rotates 
-    //RootComponent = LightComponent; // Attach PointLightComponent to root
+    // Add box component to see if it rotates  
+    //RootComponent = LightComponent; // Attach PointLightComponent to root 
     LightComponent->SetupAttachment(RootComponent); 
     LightComponent->SetMobility(EComponentMobility::Movable); 
     static ConstructorHelpers::FObjectFinder<UPointLightComponent> PointLightAsset(TEXT("/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube")); 
