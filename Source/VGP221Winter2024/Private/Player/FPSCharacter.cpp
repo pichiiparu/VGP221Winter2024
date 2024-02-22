@@ -16,16 +16,19 @@ AFPSCharacter::AFPSCharacter()
 		FPSCameraComponent->bUsePawnControlRotation = true;
 	}
 
+	/*
 	if (!FPSMesh) {
 		FPSMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
 		FPSMesh->SetupAttachment(FPSCameraComponent);
 		FPSMesh->bCastDynamicShadow = false;
 		FPSMesh->CastShadow = false;
 	}
+	*/ 
 
 	GetMesh()->SetOwnerNoSee(true);
-	sprintSpeedMultiplier = 1.0f;  
 	UE_LOG(LogTemp, Warning, TEXT("Constructor Called from FPSCharacter"));
+
+	//characterComponent->CrouchedEyeHeight = 0.5f; 
 }
 
 // Called when the game starts or when spawned
@@ -64,20 +67,24 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
 
 	//Sprint
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFPSCharacter::StartSprint); 
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFPSCharacter::EndSprint); 
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AFPSCharacter::StartSprinting); 
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AFPSCharacter::EndSprinting); 
+
+	//Crouch
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AFPSCharacter::StartCrouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AFPSCharacter::EndCrouch); 
 }
 
 void AFPSCharacter::MoveForward(float value)
 {
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-	AddMovementInput(Direction, value * sprintSpeedMultiplier);
+	AddMovementInput(Direction, value);
 }
 
 void AFPSCharacter::MoveRightNotTheSameName(float value)
 {
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-	AddMovementInput(Direction, value * sprintSpeedMultiplier);
+	AddMovementInput(Direction, value);
 }
 
 void AFPSCharacter::StartJump()
@@ -90,20 +97,32 @@ void AFPSCharacter::EndJump()
 	bPressedJump = false;
 }
 
-void AFPSCharacter::StartSprint()  
+void AFPSCharacter::StartSprinting()  
 {
-	isSprinting = true;
-	sprintSpeedMultiplier = 50.0f; 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Player Sprint Pressed"))); 
-
+	if (GetCharacterMovement()) {
+		GetCharacterMovement()->MaxWalkSpeed = sprintSpeed;
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Player Sprint Pressed")));
 }
 
-void AFPSCharacter::EndSprint()
+void AFPSCharacter::EndSprinting()
 {
-	isSprinting = false; 
-	sprintSpeedMultiplier = 1.0f; 
+	if (GetCharacterMovement()) {
+		GetCharacterMovement()->MaxWalkSpeed = walkSpeed; 
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Player Sprint Released")));
 }
 
+
+void AFPSCharacter::StartCrouch()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Crouch Pressed"))); 
+} 
+
+void AFPSCharacter::EndCrouch()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Crouch Released")));
+}
 
 void AFPSCharacter::Fire()
 {
@@ -150,5 +169,21 @@ void AFPSCharacter::Fire()
 			Projectile->FireInDirection(LaunchDirection);
 		}
 	} 
+}
+
+float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) 
+{
+	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser); 
+
+	// Easy way to acccess the gamemode 
+	AFPSGameMode* Gamemode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld())); 
+	if (Gamemode) { 
+		Health -= DamageAmount; 
+		float HealthPercent = Health / MaxHealth;  
+
+		Gamemode->CurrentWidget->SetHealthBar(HealthPercent); 
+	}
+	 
+	return FinalDamage;
 }
 

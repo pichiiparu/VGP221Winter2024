@@ -9,6 +9,7 @@
 #include "Projectile/FPSProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "FPSGameMode.h"
+#include "GameFramework/CharacterMovementComponent.h" 
 #include "FPSCharacter.generated.h"
 
 
@@ -19,6 +20,7 @@ class VGP221WINTER2024_API AFPSCharacter : public ACharacter
 
 public:
 	// Sets default values for this character's properties
+	//#include "GameFramework/CharacterMovementComponent.h"  if i want to use another method of character movement
 	AFPSCharacter();
 
 protected:
@@ -31,6 +33,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UPROPERTY(VisibleAnywhere)
+	ACharacter* characterComponent; 
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* FPSCameraComponent;
@@ -54,8 +58,11 @@ public:
 	void StartJump();
 	void EndJump();
 
-	void StartSprint();
-	void EndSprint(); 
+	void StartSprinting();
+	void EndSprinting(); 
+
+	void StartCrouch(); 
+	void EndCrouch(); 
 
 	void Fire();
 
@@ -65,5 +72,8 @@ public:
 
 	// Sprint / Movement 
 	bool isSprinting;
-	float sprintSpeedMultiplier;  
+	float sprintSpeed = 1000.0f; 
+	float walkSpeed = 600.0f; 
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override; 
 };
