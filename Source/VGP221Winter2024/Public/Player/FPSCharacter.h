@@ -9,6 +9,7 @@
 #include "Projectile/FPSProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "FPSGameMode.h"
+#include "Engine/DamageEvents.h" 
 #include "GameFramework/CharacterMovementComponent.h" 
 #include "FPSCharacter.generated.h"
 
