@@ -73,6 +73,9 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	//Crouch
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AFPSCharacter::StartCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AFPSCharacter::EndCrouch); 
+
+	//Dash Forward
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &AFPSCharacter::Dash);
 }
 
 void AFPSCharacter::MoveForward(float value)
@@ -100,7 +103,9 @@ void AFPSCharacter::EndJump()
 void AFPSCharacter::StartSprinting()  
 {
 	if (GetCharacterMovement()) {
-		GetCharacterMovement()->MaxWalkSpeed = sprintSpeed;
+		CurrentSpeed += AccelerationRate;
+		CurrentSpeed = FMath::Clamp(CurrentSpeed, BaseSpeed, MaxSpeed);
+		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Player Sprint Pressed")));
 }
@@ -108,7 +113,8 @@ void AFPSCharacter::StartSprinting()
 void AFPSCharacter::EndSprinting()
 {
 	if (GetCharacterMovement()) {
-		GetCharacterMovement()->MaxWalkSpeed = walkSpeed; 
+		CurrentSpeed = BaseSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Player Sprint Released")));
 }
@@ -170,6 +176,36 @@ void AFPSCharacter::Fire()
 		}
 	} 
 }
+
+void AFPSCharacter::Dash()
+{
+	if (bCanDash)
+	{
+		bCanDash = false;
+		GetWorldTimerManager().SetTimer(DashCooldownTimerHandle, this, &AFPSCharacter::ResetDashCooldown, DashCooldown, false);
+
+		InitialVelocity = GetCharacterMovement()->Velocity;   
+		FVector DashDirection = GetActorForwardVector();
+		FVector DashVelocity = DashDirection * CurrentSpeed * DashAcceleration;
+
+		GetCharacterMovement()->Launch(DashVelocity);
+
+		GetWorldTimerManager().SetTimer(DashResetTimerHandle, this, &AFPSCharacter::ResetDashLocation, DashDuration, false);
+	}
+}
+
+
+void AFPSCharacter::ResetDashCooldown()
+{
+	bCanDash = true;
+}
+
+void AFPSCharacter::ResetDashLocation()
+{
+	GetCharacterMovement()->Velocity = InitialVelocity;   
+	SetActorLocation(GetActorLocation());
+}
+
 
 float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) 
 {

@@ -67,6 +67,10 @@ public:
 
 	void Fire();
 
+	void Dash(); 
+	void ResetDashCooldown(); 
+	void ResetDashLocation(); 
+
 	// Temp health code
 	float Health = 100;
 	const float MaxHealth = 100;
@@ -75,6 +79,21 @@ public:
 	bool isSprinting;
 	float sprintSpeed = 1000.0f; 
 	float walkSpeed = 600.0f; 
+
+	float BaseSpeed = 600.0f; 
+	float MaxSpeed = 1000000.0f;
+	float AccelerationRate = 1000.0f; 
+	float CurrentSpeed = BaseSpeed; 
+
+	//Dash
+	FTimerHandle DashCooldownTimerHandle;
+	FTimerHandle DashResetTimerHandle; 
+	FVector InitialVelocity;   
+	float DashAcceleration = 30.0f; 
+	float DashDistance = 10000.0f; 
+	float DashDuration = 0.2f; 
+	float DashCooldown = 5.0f; 
+	bool bCanDash = true; 
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override; 
 };
