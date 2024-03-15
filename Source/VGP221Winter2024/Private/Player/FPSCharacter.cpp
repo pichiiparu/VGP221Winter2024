@@ -8,6 +8,8 @@ AFPSCharacter::AFPSCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
+	PostProcessComponent->SetupAttachment(GetCapsuleComponent()); 
 	Collider = GetCapsuleComponent(); 
 	Collider->OnComponentHit.AddDynamic(this, &AFPSCharacter::HitObject); 
 	if (!FPSCameraComponent) {
@@ -43,6 +45,14 @@ void AFPSCharacter::BeginPlay()
 	GetCharacterMovement()->JumpZVelocity = 1000.0f;
 	GetCharacterMovement()->AirControl = 1000.0f; 
 	GetCharacterMovement()->GravityScale = 2.0f; 
+
+	TArray<UPostProcessComponent*> PostProcessComponents;
+	GetComponents<UPostProcessComponent>(PostProcessComponents);
+	if (PostProcessComponents.Num() > 0)
+	{
+		PostProcessComponent = PostProcessComponents[0]; 
+	}
+	//PostProcessComponent->BlendWeight = 0.0f;   
 }
 
 // Called every frame
@@ -55,6 +65,9 @@ void AFPSCharacter::Tick(float DeltaTime)
 		CurrentSpeed = FMath::Clamp(CurrentSpeed, BaseSpeed, MaxSpeed);
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed; 
 	}
+
+	if (inWater) PostProcessComponent->BlendWeight = 1.0f; 
+	else PostProcessComponent->BlendWeight = 0.0f; 
 }
 
 // Called to bind functionality to input
@@ -257,7 +270,16 @@ void AFPSCharacter::HitObject(UPrimitiveComponent* HitComponent, AActor* OtherAc
 
 		isDashing = false;
 	} 
-
-	
 }
 
+void AFPSCharacter::ApplyWaterPostProcessMaterial(bool bApply) 
+{
+	if (bApply)
+	{
+		PostProcessComponent->BlendWeight = 1.0f;  
+	}
+	else
+	{
+		PostProcessComponent->BlendWeight = 0.0f;  
+	}
+} 

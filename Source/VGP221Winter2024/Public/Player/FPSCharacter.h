@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PostProcessComponent.h"  
+#include "Materials/MaterialInterface.h"  
 #include "GameFramework/Character.h"
 #include "Projectile/FPSProjectile.h"
 #include "Kismet/GameplayStatics.h"
@@ -107,4 +109,13 @@ public:
 
 	UFUNCTION()
 	void HitObject(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);  
+
+	UFUNCTION() 
+	void ApplyWaterPostProcessMaterial(bool bApply);     
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PostProcessing")
+	UPostProcessComponent* PostProcessComponent;  
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	UMaterialInterface* WaterPostProcessMaterial;
 };

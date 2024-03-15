@@ -1,13 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Kismet/GameplayStatics.h"  
+
 #include "GUI/FPSUserWidget.h"
+#include "Kismet/GameplayStatics.h"  
 
 void UFPSUserWidget::NativeConstruct()
 {
 	SetHealthBar(1.0f);
 	SetScore(0);
-	SetEmeraldScore(6); 
+	SetEmeraldScore(0); 
 
 	/*if (ButtonWidgetPrefab) {
 		for (int i = 0; i < 4; i++) 
