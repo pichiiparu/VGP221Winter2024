@@ -27,5 +27,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void TakeDamage(int damage); 
-	int Health = 100; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	float Health = 100.0f;
 };

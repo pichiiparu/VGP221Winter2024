@@ -40,6 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* FPSCameraComponent;
 
+	UPROPERTY(EditAnywhere) 
+	UCapsuleComponent* CollisionComponent;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "Mesh")
 	USkeletalMeshComponent* FPSMesh;
 
@@ -94,8 +97,14 @@ public:
 	FVector InitialVelocity;   
 	float DashAcceleration = 10.0f; 
 	float DashDuration = 0.2f; 
-	float DashCooldown = 5.0f; 
+	float DashCooldown = 5.0f;
+	float DashKnockbackForce = 5000.0f; 
+	bool isDashing = false; 
 	bool bCanDash = true; 
+	bool inWater = false; 
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override; 
+
+	UFUNCTION()
+	void HitObject(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);  
 };

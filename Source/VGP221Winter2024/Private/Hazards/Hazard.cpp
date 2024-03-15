@@ -3,6 +3,7 @@
 
 #include "Hazards/Hazard.h"
 #include "GameFramework/Character.h" 
+#include "Player/FPSCharacter.h"  
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -28,6 +29,8 @@ void AHazard::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
         {   
             // Set the MaxWalkSpeed property directly
             playerCharacter->GetCharacterMovement()->MaxWalkSpeed = 300.0f;       
+            AFPSCharacter* playerRef = Cast<AFPSCharacter>(OtherActor); 
+            playerRef->inWater = true;  // oopsyyy referenced player again REMINDER TO FIX LATER!!!!
         } 
     }
 }
@@ -42,6 +45,8 @@ void AHazard::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
         {
             // Set the MaxWalkSpeed property directly
             playerCharacter->GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+            AFPSCharacter* playerRef = Cast<AFPSCharacter>(OtherActor);
+            playerRef->inWater = false; 
         }
     }
 }

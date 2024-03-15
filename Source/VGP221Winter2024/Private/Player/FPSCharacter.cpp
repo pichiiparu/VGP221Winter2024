@@ -9,6 +9,7 @@ AFPSCharacter::AFPSCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	Collider = GetCapsuleComponent(); 
+	Collider->OnComponentHit.AddDynamic(this, &AFPSCharacter::HitObject); 
 	if (!FPSCameraComponent) {
 		FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera")); // Instantiate in Unity. But only in constructors
 		FPSCameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
@@ -16,6 +17,7 @@ AFPSCharacter::AFPSCharacter()
 		FPSCameraComponent->bUsePawnControlRotation = true;
 	}
 
+		
 	/*
 	if (!FPSMesh) {
 		FPSMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
@@ -111,6 +113,7 @@ void AFPSCharacter::EndJump()
 
 void AFPSCharacter::StartSprinting()  
 {
+	if (inWater) return; 
 	isSprinting = true; 
 	if (GetCharacterMovement()) {
 		CurrentSpeed += AccelerationRate;
@@ -122,6 +125,7 @@ void AFPSCharacter::StartSprinting()
 
 void AFPSCharacter::EndSprinting()
 {
+	if (inWater) return; 
 	isSprinting = false; 
 	if (GetCharacterMovement()) {
 		CurrentSpeed = BaseSpeed;
@@ -191,8 +195,10 @@ void AFPSCharacter::Fire()
 
 void AFPSCharacter::Dash()
 {
+	if (inWater) return; 
 	if (bCanDash)
 	{
+		isDashing = true;  
 		bCanDash = false;
 		GetWorldTimerManager().SetTimer(DashCooldownTimerHandle, this, &AFPSCharacter::ResetDashCooldown, DashCooldown, false);
 		InitialVelocity = GetCharacterMovement()->Velocity;
@@ -216,6 +222,7 @@ void AFPSCharacter::ResetDashLocation()
 {
 	GetCharacterMovement()->Velocity = InitialVelocity;   
 	SetActorLocation(GetActorLocation());
+	isDashing = false; 
 }
 
 
@@ -233,5 +240,24 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	 
 	return FinalDamage;
+}
+
+void AFPSCharacter::HitObject(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) 
+{
+	// Collision with only physics objects
+	if (OtherActor->ActorHasTag("Enemy") && isDashing)
+	{
+		AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OtherActor);
+		enemyCharacter->TakeDamage(25);
+		FVector CameraForwardVector = FPSCameraComponent->GetForwardVector(); 
+		FVector ImpulseDirection = -CameraForwardVector;  
+		FVector KnockbackVelocity = ImpulseDirection * DashKnockbackForce;   
+		GetCharacterMovement()->Launch(KnockbackVelocity); 
+		UE_LOG(LogTemp, Warning, TEXT("Dashing Enemy")); 
+
+		isDashing = false;
+	} 
+
+	
 }
 
