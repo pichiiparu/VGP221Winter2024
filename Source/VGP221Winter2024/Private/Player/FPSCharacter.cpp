@@ -8,7 +8,7 @@ AFPSCharacter::AFPSCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	Collider = GetCapsuleComponent(); 
 	if (!FPSCameraComponent) {
 		FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera")); // Instantiate in Unity. But only in constructors
 		FPSCameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
@@ -38,12 +38,21 @@ void AFPSCharacter::BeginPlay()
 	
 	check(GEngine != nullptr)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Spawning FPSCharacter")));
+	GetCharacterMovement()->JumpZVelocity = 1000.0f;
+	GetCharacterMovement()->AirControl = 1000.0f; 
+	GetCharacterMovement()->GravityScale = 2.0f; 
 }
 
 // Called every frame
 void AFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (isSprinting) {
+		CurrentSpeed += AccelerationRate * DeltaTime;
+		CurrentSpeed = FMath::Clamp(CurrentSpeed, BaseSpeed, MaxSpeed);
+		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed; 
+	}
 }
 
 // Called to bind functionality to input
@@ -102,6 +111,7 @@ void AFPSCharacter::EndJump()
 
 void AFPSCharacter::StartSprinting()  
 {
+	isSprinting = true; 
 	if (GetCharacterMovement()) {
 		CurrentSpeed += AccelerationRate;
 		CurrentSpeed = FMath::Clamp(CurrentSpeed, BaseSpeed, MaxSpeed);
@@ -112,6 +122,7 @@ void AFPSCharacter::StartSprinting()
 
 void AFPSCharacter::EndSprinting()
 {
+	isSprinting = false; 
 	if (GetCharacterMovement()) {
 		CurrentSpeed = BaseSpeed;
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
@@ -133,6 +144,7 @@ void AFPSCharacter::EndCrouch()
 void AFPSCharacter::Fire()
 {
 	// Easy way to acccess the gamemode
+	/*
 	AFPSGameMode* Gamemode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (Gamemode) {
 		Health -= 10;
@@ -140,7 +152,7 @@ void AFPSCharacter::Fire()
 
 		Gamemode->CurrentWidget->SetHealthBar(HealthPercent);
 	}
-
+	*/
 	// Rest of the fire code
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Player Fired Pressed")));
 
@@ -183,13 +195,13 @@ void AFPSCharacter::Dash()
 	{
 		bCanDash = false;
 		GetWorldTimerManager().SetTimer(DashCooldownTimerHandle, this, &AFPSCharacter::ResetDashCooldown, DashCooldown, false);
+		InitialVelocity = GetCharacterMovement()->Velocity;
 
-		InitialVelocity = GetCharacterMovement()->Velocity;   
-		FVector DashDirection = GetActorForwardVector();
+		FRotator CameraRotation = FPSCameraComponent->GetComponentRotation();
+		FVector DashDirection = CameraRotation.Vector();
 		FVector DashVelocity = DashDirection * CurrentSpeed * DashAcceleration;
 
 		GetCharacterMovement()->Launch(DashVelocity);
-
 		GetWorldTimerManager().SetTimer(DashResetTimerHandle, this, &AFPSCharacter::ResetDashLocation, DashDuration, false);
 	}
 }

@@ -23,6 +23,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (Health <= 0) Destroy(); 
 }
 
 // Called to bind functionality to input
@@ -30,5 +31,10 @@ void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AEnemyCharacter::TakeDamage(int damage)
+{
+	Health -= damage; 
 }
 

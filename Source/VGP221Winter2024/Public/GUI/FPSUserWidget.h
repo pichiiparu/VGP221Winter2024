@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Blueprint/UserWidget.h"  
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -27,6 +27,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ScoreText;
 
+	UPROPERTY(meta = (BindWidget)) 
+	UTextBlock* EmeraldScoreText;  
+
 	UPROPERTY(meta = (BindWidget))
 	UVerticalBox* ButtonContainer;
 
@@ -39,6 +42,12 @@ public:
 	UFUNCTION()
 	void SetScore(int newScore);
 
+	UFUNCTION() 
+	void SetEmeraldScore(int newScore); 
+
+	void OpenLevelDelayed();  
+
 private:
 	int UIScore = 0;
+	int UIEmeraldScore = 0;  
 };

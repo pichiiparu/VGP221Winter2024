@@ -46,6 +46,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gameplay")
 	FVector MuzzleOffset;
 
+	UPROPERTY(VisibleAnywhere)
+	UCapsuleComponent* Collider; 
+
 	// Connecting a prefab in blueprints. Similar to Unity gameobjects drag and drop
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<class AFPSProjectile> ProjectileClass;
@@ -81,16 +84,15 @@ public:
 	float walkSpeed = 600.0f; 
 
 	float BaseSpeed = 600.0f; 
-	float MaxSpeed = 1000000.0f;
-	float AccelerationRate = 1000.0f; 
+	float MaxSpeed = 10000.0f;
+	float AccelerationRate = 500.0f; 
 	float CurrentSpeed = BaseSpeed; 
 
 	//Dash
 	FTimerHandle DashCooldownTimerHandle;
 	FTimerHandle DashResetTimerHandle; 
 	FVector InitialVelocity;   
-	float DashAcceleration = 30.0f; 
-	float DashDistance = 10000.0f; 
+	float DashAcceleration = 10.0f; 
 	float DashDuration = 0.2f; 
 	float DashCooldown = 5.0f; 
 	bool bCanDash = true; 

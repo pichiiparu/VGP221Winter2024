@@ -3,16 +3,29 @@
 
 #include "GUI/ButtonWidget.h"
 
-void UButtonWidget::SetText(int value)
+void UButtonWidget::SetText(FText inText)
 {
-	if (!Button || !ButtonText) return;
+    if (!Button || !ButtonText) return;
 
-	num = value;
-	ButtonText->SetText(FText::FromString("Button: " + FString::FromInt(num)));
-	Button->OnClicked.AddDynamic(this, &UButtonWidget::OnButtonClick);
+    ButtonText->SetText(inText);
+    Button->OnClicked.AddDynamic(this, &UButtonWidget::OnButtonClick); 
 }
 
 void UButtonWidget::OnButtonClick()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Button Clicked: %d"), num);
+	UE_LOG(LogTemp, Warning, TEXT("Button Clicked: %s"), FString("Button Activated"));
 }
+
+void UButtonWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (!Button)
+	{
+		Button = Cast<UButton>(GetWidgetFromName(TEXT("Button")));
+		if (Button)
+		{
+			Button->OnClicked.AddDynamic(this, &UButtonWidget::OnButtonClick);
+		}
+	}
+} 

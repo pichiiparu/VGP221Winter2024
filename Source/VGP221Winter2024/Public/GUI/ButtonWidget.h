@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "CoreMinimal.h" 
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -17,6 +17,9 @@ class VGP221WINTER2024_API UButtonWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+
+	virtual void NativeConstruct() override; 
+
 	UPROPERTY(meta = (BindWidget))
 	UButton* Button;
 
@@ -25,7 +28,7 @@ public:
 
 	int num = -1;
 	UFUNCTION()
-	void SetText(int value);
+	void SetText(FText inText); 
 
 	UFUNCTION()
 	void OnButtonClick();

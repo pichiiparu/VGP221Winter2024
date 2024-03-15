@@ -13,7 +13,7 @@ AFPSProjectile::AFPSProjectile()
 		CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 		CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("Projectile"));
 		CollisionComponent->InitSphereRadius(15.0f);
-		CollisionComponent->OnComponentHit.AddDynamic(this, &AFPSProjectile::OnWhateverYouWantToNameIt);
+		CollisionComponent->OnComponentHit.AddDynamic(this, &AFPSProjectile::HitObject);
 		RootComponent = CollisionComponent;
 	}
 
@@ -74,13 +74,18 @@ void AFPSProjectile::FireInDirection(const FVector& ShootDirection)
 	ProjectileMovementComponent->Velocity = ProjectileMovementComponent->InitialSpeed * ShootDirection;
 }
 
-void AFPSProjectile::OnWhateverYouWantToNameIt(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+void AFPSProjectile::HitObject(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Collision with only physics objects
 	if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
 	{
 		OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
 		Destroy();
+	}
+	if (OtherActor->ActorHasTag("Enemy")) 
+	{
+		AEnemyCharacter* enemyCharacter = Cast<AEnemyCharacter>(OtherActor); 
+		enemyCharacter->TakeDamage(25); 
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Colliding with something"));
