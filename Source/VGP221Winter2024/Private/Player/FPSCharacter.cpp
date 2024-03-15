@@ -43,7 +43,7 @@ void AFPSCharacter::BeginPlay()
 	check(GEngine != nullptr)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Spawning FPSCharacter")));
 	GetCharacterMovement()->JumpZVelocity = 1000.0f;
-	GetCharacterMovement()->AirControl = 1000.0f; 
+	GetCharacterMovement()->AirControl = 10000.0f; 
 	GetCharacterMovement()->GravityScale = 2.0f; 
 
 	TArray<UPostProcessComponent*> PostProcessComponents;
@@ -52,6 +52,7 @@ void AFPSCharacter::BeginPlay()
 	{
 		PostProcessComponent = PostProcessComponents[0]; 
 	}
+	PostProcessComponent->AddOrUpdateBlendable(WaterPostProcessMaterial);  
 	//PostProcessComponent->BlendWeight = 0.0f;   
 }
 
@@ -66,9 +67,29 @@ void AFPSCharacter::Tick(float DeltaTime)
 		GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed; 
 	}
 
-	if (inWater) PostProcessComponent->BlendWeight = 1.0f; 
-	else PostProcessComponent->BlendWeight = 0.0f; 
+	if (inWater) {
+		PostProcessComponent->BlendWeight = 1.0f;
+
+		float DamageAmount = 1.0f;
+		FDamageEvent DamageEvent; 
+		TakeDamage(DamageAmount, DamageEvent, nullptr, this);  
+	}
+	else PostProcessComponent->BlendWeight = 0.0f;  
+
+	if (Health <= 0) {
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Sonic Died!")));
+		FTimerHandle DelayTimerHandle;
+		float DelaySeconds = 2.0f;
+		FTimerDelegate TimerCallback;
+		TimerCallback.BindUObject(this, &AFPSCharacter::GameOverDelayed);  
+		GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, TimerCallback, DelaySeconds, false);
+	}
 }
+
+void AFPSCharacter::GameOverDelayed()  
+{
+	UGameplayStatics::OpenLevel(GetWorld(), FName("GameOver"));  
+} 
 
 // Called to bind functionality to input
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -222,6 +243,10 @@ void AFPSCharacter::Dash()
 
 		GetCharacterMovement()->Launch(DashVelocity);
 		GetWorldTimerManager().SetTimer(DashResetTimerHandle, this, &AFPSCharacter::ResetDashLocation, DashDuration, false);
+
+		UObject* WorldContextObject = this;
+		float VolumeMultiplier = 1.0f;
+		UGameplayStatics::PlaySound2D(WorldContextObject, DashSound, VolumeMultiplier);  
 	}
 }
 
@@ -252,6 +277,10 @@ float AFPSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		Gamemode->CurrentWidget->SetHealthBar(HealthPercent); 
 	}
 	 
+	UObject* WorldContextObject = this;
+	float VolumeMultiplier = 1.0f;
+	UGameplayStatics::PlaySound2D(WorldContextObject, DamagedSound, VolumeMultiplier);  
+
 	return FinalDamage;
 }
 
@@ -267,8 +296,6 @@ void AFPSCharacter::HitObject(UPrimitiveComponent* HitComponent, AActor* OtherAc
 		FVector KnockbackVelocity = ImpulseDirection * DashKnockbackForce;   
 		GetCharacterMovement()->Launch(KnockbackVelocity); 
 		UE_LOG(LogTemp, Warning, TEXT("Dashing Enemy")); 
-
-		isDashing = false;
 	} 
 }
 

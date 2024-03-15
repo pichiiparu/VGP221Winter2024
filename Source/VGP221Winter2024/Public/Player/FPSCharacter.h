@@ -79,6 +79,8 @@ public:
 	void ResetDashCooldown(); 
 	void ResetDashLocation(); 
 
+	void GameOverDelayed(); 
+
 	// Temp health code
 	float Health = 100;
 	const float MaxHealth = 100;
@@ -118,4 +120,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
 	UMaterialInterface* WaterPostProcessMaterial;
+	 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio") 
+	USoundBase* DashSound;  
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* DamagedSound;
+
 };

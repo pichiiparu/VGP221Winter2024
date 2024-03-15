@@ -29,6 +29,7 @@ void AHazard::EnterHazard(ACharacter* PlayerCharacter)
         {
             PlayerRef->inWater = true;
             PlayerRef->isSprinting = false;
+            PlayerRef->Health--; 
         }
     }
 }
